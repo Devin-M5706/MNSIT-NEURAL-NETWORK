@@ -3,6 +3,8 @@
 
 This project is a hybrid of machine learning and redstone engineering: a fully simulated neural network trained on the **MNIST handwritten digits dataset**, with the ultimate goal of recreating its behavior **within Minecraft** using redstone logic.
 
+Linkedin Post - https://www.linkedin.com/feed/update/urn:li:activity:7314837008021950464/ 
+
 Inspired by the groundbreaking work of [MattBatWings](https://www.youtube.com/@MattBatWings), this project aims to bridge the gap between educational AI tools and Minecraft's mechanical sandbox.
 
 ## 🎯 Project Goal
