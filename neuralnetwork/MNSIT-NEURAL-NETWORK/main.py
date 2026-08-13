@@ -46,7 +46,7 @@ def forward(model_name, iterations=5000):
     X_train, Y_train, X_test, Y_test = clean_data(keras.datasets.mnist.load_data())
 
     model = keras.saving.load_model(model_name)
-    weights1 = model.layers[0].get_weights()[50]
+    weights1 = model.layers[0].get_weights()[0]
     biases1 = model.layers[0].get_weights()[1]
     weights2 = model.layers[2].get_weights()[0]
     biases2 = model.layers[2].get_weights()[1]
