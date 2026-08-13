@@ -44,6 +44,44 @@ the math.
 | `np.where(out == np.max(out), 1, 0)` | A 10-way comparator tree over `int16`. |
 | `int8` accumulator wrapping | An 8-bit adder with no carry-out. The overflow is the hardware's, not a bug. |
 
+The same mapping, drawn. Top row is what `forward()` executes; bottom row is the
+structure each line becomes. The dotted edges are the parts still undecided:
+
+```mermaid
+graph TD
+  subgraph PY["forward() in Python"]
+    P1["X is 784 values in 0,1"]
+    P2["if pixel: weight += w1[i]"]
+    P3["np.maximum(0, hidden)"]
+    P4["w2[i] * value, int16"]
+    P5["np.where(out == max)"]
+  end
+
+  subgraph RS["Redstone build"]
+    R1["784 lamps<br/>one wire per pixel"]
+    R2["gated ROM into<br/>8-bit adder bus"]
+    R3["sign-bit test<br/>1 torch + 8 gates"]
+    R4["100 multipliers<br/>8x8 to 16 bit"]
+    R5["comparator tree<br/>4 levels deep"]
+  end
+
+  P1 --> R1
+  P2 --> R2
+  P3 --> R3
+  P4 --> R4
+  P5 --> R5
+
+  OPEN["Open build questions"]
+
+  R2 -.->|"62720 bits of weight ROM<br/>dominates block count"| OPEN
+  R2 -.->|"serial or parallel accumulation?<br/>space vs ticks"| OPEN
+  R4 -.->|"shift-and-add or lookup table?"| OPEN
+  R5 -.->|"ties light 2 lamps<br/>needs a priority encoder"| OPEN
+```
+
+Editable source: `diagrams/redstone-mapping.excalidraw`. The per-layer sketches
+below go a level deeper on the wiring inside each of those bottom-row boxes.
+
 ---
 
 ## Layer by layer

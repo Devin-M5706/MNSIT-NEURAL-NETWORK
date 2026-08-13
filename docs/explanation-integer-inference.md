@@ -139,6 +139,43 @@ everything.
 
 ---
 
+## The resulting pipeline
+
+Those four decisions produce this. Every box is a structure that has to exist in
+redstone, and every edge label is a wire width or a cost:
+
+```mermaid
+graph TD
+  IN["784 pixels, 1 bit each<br/>binarized at 0.5"]
+  ACC["hidden layer<br/>10 accumulators, int8"]
+  RELU["ReLU<br/>max(0, x) = sign-bit test"]
+  OUT["output layer<br/>10 accumulators, int16"]
+  ARG["argmax"]
+  DIGIT["digit 0-9"]
+
+  IN -->|"for each lit pixel:<br/>add, else skip"| ACC
+  ACC -->|"wraps at 127"| RELU
+  RELU -->|"int8, >= 0"| OUT
+  OUT -->|"raw scores"| ARG
+  ARG --> DIGIT
+
+  W1["weights1 int8<br/>784 x 10, 2 bits past radix"]
+  W2["weights2 int8<br/>10 x 10"]
+  SM["softmax"]
+
+  W1 -.->|"7840 adds<br/>ZERO multipliers"| ACC
+  W2 -.->|"100 multipliers"| OUT
+  SM -.->|"skipped: monotonic,<br/>cannot change the argmax"| ARG
+```
+
+The two dotted weight edges carry the whole argument. Binarizing the input moved
+the multiplier count from 7840 to 100, and everything else follows from having
+made that layer free.
+
+Editable source: `diagrams/integer-inference-pipeline.excalidraw`.
+
+---
+
 ## Accumulator width is the whole game
 
 Here is the part that most repays attention, and the part that most easily

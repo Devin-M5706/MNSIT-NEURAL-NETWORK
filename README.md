@@ -23,10 +23,43 @@ Project write-up on
 Quantization costs just under 7 points. That gap is the price of a machine you
 can actually build.
 
-## Quickstart
+## Setup
+
+**Requirements**
+
+| | |
+|---|---|
+| Python | 3.10 or newer (`python --version`) |
+| Disk | ~200 MB for Keras and a backend, plus 11 MB for the MNIST cache |
+| Network | First run only, to download MNIST to `~/.keras/datasets/` |
+| GPU | Not needed. Everything here is CPU-only. |
+
+**Install**
 
 ```bash
-pip install numpy keras tensorflow-cpu
+git clone https://github.com/Devin-M5706/MNSIT-NEURAL-NETWORK.git
+cd MNSIT-NEURAL-NETWORK
+
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+
+pip install -r requirements.txt
+```
+
+`requirements.txt` pulls `numpy`, `keras`, `tensorflow-cpu`, and `pytest`.
+Keras 3 needs a backend; `tensorflow-cpu` is the default because it is the
+smallest that installs cleanly everywhere. PyTorch and JAX work identically if
+you would rather set `KERAS_BACKEND`.
+
+Verified working on 2026-08-13 with numpy 2.5.2, keras 3.15.1,
+tensorflow_cpu 2.21.0, pytest 9.1.1.
+
+**Run**
+
+You must run from the code directory, because `main.py` loads the model by a
+relative path.
+
+```bash
 cd neuralnetwork/MNSIT-NEURAL-NETWORK
 python main.py
 ```
@@ -40,6 +73,33 @@ Accuracy: 8544 / 10000 = 85.44%
 ```
 
 Full walkthrough: [Tutorial: your first run](docs/tutorial-first-run.md).
+
+## Tests
+
+35 tests, run from the repository root:
+
+```bash
+pytest tests/                     # everything, ~29s
+pytest tests/ -m "not slow"       # skip the full-test-set runs, ~14s
+pytest tests/test_quantization.py                                  # one file
+pytest tests/test_forward.py::TestAccuracy -v                      # one class
+pytest "tests/test_forward.py::TestKnownEdgeCases::test_ties_produce_multiple_winners"
+```
+
+They skip cleanly with a message if Keras or the trained model is missing.
+
+What they cover:
+
+| File | Covers |
+|---|---|
+| `tests/test_data.py` | Shapes, dtypes, the strict `{0,1}` input domain, and the raw-byte-128 binarization threshold |
+| `tests/test_quantization.py` | Fixed-point round trips, `check_overflow` bounds, and the intentional int8 wrap |
+| `tests/test_forward.py` | Layer-index assumptions, the stdout contract, accuracy regression, and known edge cases |
+
+Two tests are marked `slow` because they evaluate all 10000 images. One of them
+locks the exact figure `8544 / 10000` for the shipped weights; the pass is fully
+deterministic, so if you retrain, that number moves and the docs need updating
+with it.
 
 ## Architecture
 
@@ -93,10 +153,14 @@ Reasoning in full:
 
 ```
 main.py                                       placeholder, not part of the project
+requirements.txt
 neuralnetwork/MNSIT-NEURAL-NETWORK/
     main.py                                   all project code
     mnist_model.keras                         trained weights, 112 KB
-docs/                                         documentation
+tests/                                        pytest suite (35 tests)
+docs/                                         Diataxis documentation
+diagrams/                                     mermaid sources + SVG/PNG/excalidraw
+CLAUDE.md                                     guidance for AI coding agents
 ```
 
 ## Technologies
