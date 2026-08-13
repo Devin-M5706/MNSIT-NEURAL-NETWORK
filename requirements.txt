@@ -1,0 +1,15 @@
+# Runtime dependencies for the MNIST integer-inference simulator.
+#
+# Keras 3 needs a backend. tensorflow-cpu is the default here because it is the
+# smallest of the three that installs cleanly on Windows, macOS, and Linux.
+# PyTorch or JAX work identically; set KERAS_BACKEND accordingly if you swap.
+#
+# Lower bounds, not pins. Versions verified working on 2026-08-13:
+#   numpy 2.5.2, keras 3.15.1, tensorflow_cpu 2.21.0, pytest 9.1.1
+
+numpy>=2.0
+keras>=3.0
+tensorflow-cpu>=2.16
+
+# Tests
+pytest>=8.0
